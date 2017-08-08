@@ -1,0 +1,10 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+.TodoItem {	display: block; margin: 0.5em auto; width: 25em; border: 1px solid black; text-align: left;}
+	.TodoText { display: inline-block; }
+		.TodoText.Active { color: red; }
+		.TodoText.Completed { color: green; text-decoration: line-through; }
+	.TodoRemoveButton { display: inline-block; margin-left: 75%; cursor: pointer; }
