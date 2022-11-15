@@ -1,5 +1,4 @@
 # todo-list
-Something here
 
 Todo list with ReactJS
 
