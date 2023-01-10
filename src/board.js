@@ -1,110 +1,99 @@
-import React, {Component} from 'react';
-import TodoList from './todolist'
-import Title from './title';
-import TodoForm from './todoform';
-window.id = 0;
-export default class Board extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			data: [],
-			activeTodos: 0,
-			completedTodos: 0
-		}
-		this.addTodo = this.addTodo.bind(this);
-		this.handleRemove = this.handleRemove.bind(this);
-		this.handleTodoStatus = this.handleTodoStatus.bind(this);
-		this.handleEdit = this.handleEdit.bind(this);
-		this.handleInputValue = this.handleInputValue.bind(this);
-		this.handleSave = this.handleSave.bind(this);
-	}
-	addTodo(val) {
-		const todo = {text: val, id: window.id++, status: 'Active', isEditable: false}
-		let active = this.state.activeTodos;
-		this.state.data.push(todo);
-		this.setState({data: this.state.data, activeTodos: active+1});
-	}
-	handleRemove(id, status) {
-		let active = this.state.activeTodos;
-		let completed = this.state.completedTodos;
-		const remainder = this.state.data.filter((todo) => {
-			if (todo.id !== id) {
-				return todo;
-			};
-		});
-		if (status === "Active") {
-			active -= 1;
+import React, { memo, useCallback, useState } from 'react';
+import { TodoList } from './todo-list'
+import { Title } from './title';
+import { TodoForm } from './todo-form';
+
+export const Board = memo(function Board() {
+	const [data, setData] = useState([]);
+	const [activeTodos, setActiveTodos] = useState(0);
+	const [completedTodos, setCompletedTodos] = useState(0);
+
+	const addTodo = useCallback((name) => {
+		const todo = {
+			text: name,
+			id: Math.round(Math.random() * 100),
+			status: 'Active',
+			isEditable: false,
+		};
+		setData([...data, todo]);
+		setActiveTodos(activeTodos+1);
+	}, [data, activeTodos]);
+
+	const handleRemove = useCallback((id, status) => {
+		setData(data.filter((item) => item.id !== id));
+		
+		if (status === 'Active') {
+			setActiveTodos(activeTodos - 1);
 		} else {
-			completed -= 1;
+			setCompletedTodos(completedTodos - 1);
 		}
-		this.setState({data: remainder, activeTodos: active, completedTodos: completed});
-	}
-	handleTodoStatus(id, status) {
+	}, [data, completedTodos, activeTodos]);
+
+	const handleTodoStatus = useCallback((id, status) => {
 		const newStatus = status === 'Active' ? 'Completed': 'Active';
-		const data = this.state.data;
-		let active = this.state.activeTodos;
-		let completed = this.state.completedTodos;
-		for (var i = 0; i < data.length; i++) {
-			if (data[i].id === id) {
-				if (data[i].status === "Active") {
-					active -= 1;
-					completed += 1;
-				} else {
-					active += 1;
-					completed -=1;
-				}
-				data[i].status = newStatus;
-			}
-		}
-		this.setState({data, activeTodos: active, completedTodos: completed});
-	}
-	handleEdit(id) {
-		let data = this.state.data;
-		for (var i = 0; i < data.length; i++) {
-			if (data[i].id === id) {
-				data[i].isEditable = true;
-			}
-		}
-		this.setState({data});
-	}
+		const todoIndex = data.findIndex((item) => item.id === id);
 
-	handleInputValue(evt, id) {
-		let data = this.state.data;
-		let newText = evt.target.value;
-		for (var i = 0; i < data.length; i++) {
-			if (data[i].id === id) {
-				data[i].text = newText;
+		if (todoIndex !== -1) {
+			let newData = [...data];
+			newData[todoIndex] = {
+				...newData[todoIndex],
+				status: newStatus,
+			};
+
+			setData(newData);
+
+			if (newStatus === 'Active') {
+				setActiveTodos(activeTodos + 1);
+				setCompletedTodos(completedTodos - 1);
+			} else {
+				setActiveTodos(activeTodos - 1);
+				setCompletedTodos(completedTodos + 1);
 			}
 		}
-		this.setState({data});
-	}
+	}, [data, completedTodos, activeTodos]);
 
-	handleSave(id) {
-		let data = this.state.data;
-		for (var i = 0; i < data.length; i++) {
-			if (data[i].id === id) {
-				data[i].isEditable = false;
-			}
+	const handleEdit = useCallback((id, isEditable) => {
+		const todoIndex = data.findIndex((item) => item.id === id);
+
+		if (todoIndex !== -1) {
+			const newData = [...data];
+			newData[todoIndex] = {
+				...newData[todoIndex],
+				isEditable,
+			};
+
+			setData(newData);
 		}
-		this.setState({data});
-	}
+	}, [data]);
 
-	render () {
-		return (
-			<div>
-				<Title />
-				<TodoForm addTodo={this.addTodo}/>
-				<TodoList 
-					todos={this.state.data} 
-					remove={this.handleRemove} 
-					handleStatus={this.handleTodoStatus} 
-					activeTodos={this.state.activeTodos}
-					completedTodos={this.state.completedTodos}
-					editTodo={this.handleEdit}
-					handleInputValue={this.handleInputValue}
-					handleSave={this.handleSave}
-				/>
-			</div>
-		)
-	}
-}
+	const handleSave = useCallback((id, value) => {
+		const todoIndex = data.findIndex((item) => item.id === id);
+
+		if (todoIndex !== -1) {
+			const newData = [...data];
+			newData[todoIndex] = {
+				...newData[todoIndex],
+				text: value,
+				isEditable: false,
+			};
+
+			setData(newData);
+		}
+	}, [data]);
+
+	return (
+		<div>
+			<Title />
+			<TodoForm addTodo={addTodo}/>
+			<TodoList 
+				todos={data} 
+				remove={handleRemove} 
+				handleStatus={handleTodoStatus} 
+				activeTodos={activeTodos}
+				completedTodos={completedTodos}
+				editTodo={handleEdit}
+				handleSave={handleSave}
+			/>
+		</div>
+	)
+})

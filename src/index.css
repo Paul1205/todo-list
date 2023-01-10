@@ -3,8 +3,32 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
-.TodoItem {	display: block; margin: 0.5em auto; width: 25em; border: 1px solid black; text-align: left;}
-	.TodoText { display: inline-block; }
-		.TodoText.Active { color: red; }
-		.TodoText.Completed { color: green; text-decoration: line-through; }
-	.TodoRemoveButton { display: inline-block; margin-left: 75%; cursor: pointer; }
+
+.TodoItem {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin: 0.5em auto; 
+	width: 25rem;
+	border: 1px solid black;
+	padding: 10px;
+}
+
+.TodoText.Active { 
+	color: red; 
+}
+
+.TodoText.Completed { 
+	color: green; text-decoration: line-through; 
+}
+
+.TodoItem.isDisabled .TodoText {
+	border: unset;
+	background: unset;
+}
+
+.TodoContent, .TodoActions {
+	display: flex;
+	gap: 5px;
+}

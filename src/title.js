@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react';
 
-const title = () => {
+export const Title = memo(function Title() {
 	return (
 		<div>
 			<h1>To do list</h1>
 		</div>
 	)
-};
-export default title;
+});
